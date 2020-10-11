@@ -6,8 +6,8 @@ islist = False
 filteredRules = []
 with open('pfrule.txt','r') as f:
     for line in f:
-        result = re.search(r"(?<=$)\w+",line)
-        print('result it',result.group(0))
+        # result = re.search(r"(?<=$)\w+",line)
+        # print('result it',result.group(0))
         rules = line.split()
         rulelen = len(rules)
         for s in range(rulelen):

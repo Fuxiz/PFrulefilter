@@ -2,6 +2,11 @@ import re
 
 test = 'test2="10.2.0.1"'
 hostname = 'test2'
-regex = rf'\(?<=%hostname\=\")\d.{7}'
-result = re.sub(regex, "worked", test)
-print(result)
+regex = rf'(?<={hostname}\=\")\d.{{7}}'
+for match in re.finditer(regex,test):
+    s = match.start()
+    e = match.end()
+# result = re.finditer(regex,test,re.M|re.I )
+    print('string is',test,'start is',s,'end is',e,'and result is',match.group(0))
+
+print(test)
