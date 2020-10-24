@@ -22,6 +22,9 @@ def main():
                 elif re.search('\$.+', rules[s]):
                     print(findhost(rules[s].strip('$')))
                     continue 
+                elif rules[s] == '<':
+                    print(findtable(rules[s].strip('$')))
+                    continue
                 if islist == True:
                     if re.search('\$.+', rules[s]) is None:
                         print(rules[s])
@@ -49,4 +52,8 @@ def findhost(hostname):
                 result = match.group(0)
                 return(result)            
     return(result)
+
+def findtable(listname)
+
 main()
+
