@@ -1,14 +1,17 @@
-from abc import abstractmethod
+#!/usr/bin/python3
 import re
+import sys
+
 
 def findhost(hostname):
-    with open('hosts.txt','r') as hostline:
+    hostfile = sys.argv[1]
+    with open(hostfile,'r') as hostline:
         if type(hostname) == str:
             hostname = hostname.strip("$")
         else:
             hostname = hostname.group().strip("$")
         result = 'none'
-        regex = rf'(?<={hostname}\=\")\d.{{4,12}}'
+        regex = rf'(?<={hostname}\=\").+'
         try:
             result = re.search(regex,hostline.read())
             result = result.group().strip('"')
@@ -19,7 +22,8 @@ def findhost(hostname):
 def findtable(tablename):
     tablename = tablename.group().strip("<>")
     hostlist = []
-    with open('table','r') as hostline:
+    tablesfile = sys.argv[2] 
+    with open(tablesfile,'r') as hostline:
         try:
             m = re.search(rf'.+\<{tablename}\>.+', hostline.read())
             temp = str(m.group())
