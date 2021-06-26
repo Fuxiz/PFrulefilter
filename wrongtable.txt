@@ -1,0 +1,5 @@
+table   <table1>    persist    { $host1 $host2}
+table   <table2>    persist    { $host3 $host4 }
+table   <table3>    persist    { $host5 $host6 }
+table   <table4>    persist    { $host7 $host8 }
+table   <table5>    persist    { $host9 $host10 }

@@ -53,7 +53,20 @@ def findhost(hostname):
                 return(result)            
     return(result)
 
-def findtable(listname)
-
+def findtable(listname):
+    with open('table','r') as hostline:
+        tablename = 'table2'
+        regexfilter2 = rf'(?<={tablename})'    
+        try:
+            m = re.search(rf'.+\<{tablename}\>.+', hostline.read())
+            temp = str(m.group())
+            print(temp)
+        except AttributeError:
+            print(tablename)         
+        try:
+            m2 = re.findall(r'\<.+\>',temp)
+            print(m2)
+        except AttributeError:
+            print("host not found")
 main()
 
