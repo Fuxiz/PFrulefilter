@@ -1,7 +1,18 @@
 #!/usr/bin/python3
 import re
 import sys
+import argparse
 
+matchhostlist = []
+matchtablelist = []
+
+parser = argparse.ArgumentParser()
+parser.add_argument('files', type=str,default="-r",metavar=('host file', 'tables'),nargs=2)
+parser.add_argument("-s", "--source", default="-r", help="Source address")
+parser.add_argument("-d", "--destination", default="-r",help="destination address")
+parser.add_argument("-r", "--resolve",default="-r",action="store_false",help="resolve all rules")
+
+args = parser.parse_args()
 
 def findhost(hostname):
     hostfile = sys.argv[1]
@@ -34,24 +45,40 @@ def findtable(tablename):
         for i in m2:
             host = findhost(i)
             hostlist.append(host)
+        matchtablelist = hostlist.copy()
         return(str(hostlist))
+
+def findhostrule(line,source,destination):
+        hostlist = []
+        hostlistraw = re.findall(r'\$[\S]+',line)
+        for i in hostlistraw:
+            host = findhost(i)
+            if source == host:
+                print('found it') 
+
 
 
 def main():
     with open('pfrule.txt','r') as hostline:
 
-        tablename = 'table2'
-        regexfilter2 = rf'(?<={tablename})'
-        for line in hostline:
-            try:
-                matchhost = re.sub(r'\$[\w\d]+',findhost,line)
-                line = matchhost
-            except AttributeError:
-                print("no host found")
-            try:
-                matchtable = re.sub(r'\<\S+\>',findtable,line)
-                print(matchtable)
-            except AttributeError:
-                print(line)
+        if args.source is not False:
+            foundrule = findhostrule(hostline,args.source,args.destination)
+            print(foundrule)
+        else: 
+            for line in hostline:
+                try:
+                    matchhost = re.sub(r'\$[\S]+',findhost,line)
+                    line = matchhost
+                except AttributeError:
+                    print("no host found")
+                try:
+                    matchtable = re.sub(r'\<\S+\>',findtable,line)
+                    print(matchtable)
+                except AttributeError:
+                    print(line)
+            
+            
+            
+            
  
 main()
