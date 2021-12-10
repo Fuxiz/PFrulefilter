@@ -7,10 +7,10 @@ matchhostlist = []
 matchtablelist = []
 
 parser = argparse.ArgumentParser()
-parser.add_argument('files', type=str,default="-r",metavar=('host file', 'tables'),nargs=2)
-parser.add_argument("-s", "--source", default="-r", help="Source address")
-parser.add_argument("-d", "--destination", default="-r",help="destination address")
-parser.add_argument("-r", "--resolve",default="-r",action="store_false",help="resolve all rules")
+parser.add_argument('anchor', type=str,default="False",help="anchor to resolve from",metavar=('anchor'),nargs=1)
+parser.add_argument("-s", "--source", default="False", help="Source address")
+parser.add_argument("-d", "--destination", default="False",help="destination address")
+parser.add_argument("-r", "--resolve",default="False",action="store_false",help="resolve all rules")
 
 args = parser.parse_args()
 
@@ -49,23 +49,39 @@ def findtable(tablename):
         return(str(hostlist))
 
 def findhostrule(line,source,destination):
-        hostlist = []
-        hostlistraw = re.findall(r'\$[\S]+',line)
-        for i in hostlistraw:
-            host = findhost(i)
-            if source == host:
-                print('found it') 
-
+    sourcelistraw = []
+    destlistraw = []
+    resolvedsource = []
+    resloveddest = []
+    sourcelistraw = re.findall(r'(?<=from).+(?= to)',line)
+    sourcelistclean = sourcelistraw[0].split()
+    destlistraw = re.findall(r'(?<= to ).+(?= port)',line)
+    destlistclean = destlistraw[0].split()
+    for i in sourcelistclean:
+        if i.startswith("<"):
+            sourcetablelist = findtable(i).split
+            resolvedsource.extend(sourcetablelist)
+        else:
+            sourcehost = findhost(i)
+            resolvedsource.append(sourcehost)
+    for p in destlistclean:
+        if i.startswith("<"):
+            desttablelist = findtable(i).split
+            resolvedsource.extend(desttablelist)
+        else:        
+            desthost = findhost(p)
+            resloveddest.append(desthost)
+    if source in resolvedsource and destination in resloveddest:
+        print(line)
 
 
 def main():
     with open('pfrule.txt','r') as hostline:
 
-        if args.source is not False:
-            foundrule = findhostrule(hostline,args.source,args.destination)
-            print(foundrule)
-        else: 
-            for line in hostline:
+        for line in hostline:
+            if args.source is not "False":
+                findhostrule(line,args.source,args.destination)
+            else: 
                 try:
                     matchhost = re.sub(r'\$[\S]+',findhost,line)
                     line = matchhost
