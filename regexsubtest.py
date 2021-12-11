@@ -3,7 +3,7 @@ import re
 import sys
 import argparse
 import os
-import netaddr
+import ipaddress
 
 matchhostlist = []
 matchtablelist = []
@@ -51,6 +51,14 @@ def findtable(tablename):
         matchtablelist = hostlist.copy()
         return(matchtablelist)
 
+def findipinnetwork(ip,network):
+    if ipaddress.ip_address(ip) in ipaddress.ip_network(network):
+        return(ip)
+    else:
+        return(network)
+
+
+
 def findhostrule(line,source,destination):
     sourcelistraw = []
     destlistraw = []
@@ -69,16 +77,26 @@ def findhostrule(line,source,destination):
             resolvedsource.extend(sourcetablelist)
         else:
             sourcehost = findhost(i)
-            resolvedsource.append(sourcehost)
+            if "/" in sourcehost:
+                resolvedsource.append(findipinnetwork(source,sourcehost))
+            else:
+                resolvedsource.append(sourcehost)
+
     for p in destlistclean:
         if i.startswith("<"):
             desttablelist = findtable(i)
             resolveddest.extend(desttablelist)
         else:        
             desthost = findhost(p)
-            resolveddest.append(desthost)
+            if "/" in desthost:
+                resolveddest.append(findipinnetwork(destination,desthost))
+            else:
+                resolveddest.append(desthost)
+    
     if source in resolvedsource and destination in resolveddest:
         print(line)
+    
+
 
 
 
