@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "args": ["firewalls_aefw","-s 10.197.0.1","-d 10.224.128.1"],
+            "args": ["firewalls_nlfw","-s 10.0.0.1","-d 192.168.232.25"],
             "program": "${file}",
             "console": "integratedTerminal"
         }
