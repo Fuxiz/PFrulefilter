@@ -3,6 +3,7 @@ import re
 import sys
 import argparse
 import os
+import netaddr
 
 matchhostlist = []
 matchtablelist = []
@@ -30,7 +31,8 @@ def findhost(hostname):
                 result = result.group().strip('"')
                 return(str(result))
             except AttributeError:
-                return(hostname)
+                continue
+    return(hostname)
 
 def findtable(tablename):
     tablename = tablename.strip("<>")
