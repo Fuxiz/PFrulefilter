@@ -70,7 +70,7 @@ def findhostrule(line,source,destination):
         sourcelistclean = sourcelistraw[0].split()
     except IndexError:
         return
-    destlistraw = re.findall(r'(?<= to ).+(?=keep|no|port)',line)
+    destlistraw = re.findall(r'(?<= to ).+(?=keep|no|port|})',line)
     destlistclean = destlistraw[0].split()
     for i in sourcelistclean:
         if i.startswith("<"):
