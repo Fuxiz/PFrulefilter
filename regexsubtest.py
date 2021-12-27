@@ -4,6 +4,8 @@ import sys
 import argparse
 import os
 import ipaddress
+from collections import defaultdict
+
 
 matchhostlist = []
 matchtablelist = []
@@ -61,46 +63,91 @@ def findipinnetwork(ip,network):
 
 
 def findhostrule(line,source,destination):
-    sourcelistraw = []
-    destlistraw = []
+
+    ruledict = defaultdict(list)
+    keys_list = ["src","dest","port"]
+    sourcelist= []
+    destlist= []
+    portlist= []
     resolvedsource = [""]
     resolveddest = [""]
-    sourcelistraw = re.findall(r'(?<=from).+(?=to)',line)
-    try:
-        sourcelistclean = sourcelistraw[0].split()
-    except IndexError:
-        return
-    destlistraw = re.findall(r'(?<= to ).+(?=keep|no|port|})',line)
-    destlistclean = destlistraw[0].split()
-    for i in sourcelistclean:
-        if i.startswith("<"):
-            sourcetablelist = findtable(i)
-            resolvedsource.extend(sourcetablelist)
+    tmptablesrc = [""]
+    tmptabledest = [""]
+    splitrawrule = line.split()
+    for item in splitrawrule:
+        if item == "from":
+            sourceindex = splitrawrule.index(item)
+            if splitrawrule[sourceindex+1] == '{':
+                ruleindex = sourceindex+2
+                try:
+                    while splitrawrule[ruleindex] != '}':
+                        sourcelist.append(splitrawrule[ruleindex])
+                        ruleindex += 1
+                except IndexError:
+                    print(f'Curly bracket is to close to a macro, for example {{ $macro}} \n {line}')
+            else:
+                sourcelist.append(splitrawrule[sourceindex+1])
+        elif item == "to":
+            destindex = splitrawrule.index(item)
+            if splitrawrule[destindex+1] == '{':
+                ruleindex = destindex+2
+                try:
+                    while splitrawrule[ruleindex] != '}':
+                        destlist.append(splitrawrule[ruleindex])
+                        ruleindex += 1
+                except IndexError:
+                    print(f'Curly bracket is to close to a macro, for example {{ $macro}} \n {line}')                
+            else:
+                destlist.append(splitrawrule[destindex+1])
+        
+        elif item == "port":
+            portindex = splitrawrule.index(item)
+            if splitrawrule[portindex+1] == '{':
+                ruleindex = portindex+2
+                try:
+                    while splitrawrule[ruleindex] != '}':
+                        portlist.append(splitrawrule[ruleindex])
+                        ruleindex += 1
+                except IndexError:
+                    print(f'Curly bracket is to close to a macro, for example {{ $macro}} \n {line}')
+            else:
+                portlist.append(splitrawrule[portindex+1])
+
+    for i in sourcelist:
+        if i.startswith("$"):
+            resolvedsource.append(findhost(i))
+        elif i.startswith("<"):
+            tmptablesrc.extend(findtable(i))
+            for p in tmptablesrc:
+                if "/" in p:
+                    resolvedsource.append(findipinnetwork(source,p))
         else:
-            sourcehost = findhost(i)
-            if "/" in sourcehost:
-                resolvedsource.append(findipinnetwork(source,sourcehost))
-            else:
-                resolvedsource.append(sourcehost)
-    for p in destlistclean:
-        if p.startswith("<"):
-            desttablelist = findtable(p)
-            resolveddest.extend(desttablelist)
-        else:        
-            desthost = findhost(p)
-            if "/" in desthost:
-                resolveddest.append(findipinnetwork(destination,desthost))
-            else:
-                resolveddest.append(desthost)
-    
+            resolvedsource.extend(i)
+
+    for i in destlist:
+        if i.startswith("$"):
+            tmphostdest = findhost(i)
+            if "/" in tmphostdest:
+                resolveddest.append(findipinnetwork(destination,tmphostdest))
+        elif i.startswith("<"):
+            tmptabledest = findtable(i)
+            for p in tmptabledest:
+                if "/" in p:
+                     resolveddest.extend(findipinnetwork(destination,p))
+                else:
+                    resolveddest.append(p)
+        else:
+            resolveddest.append(i)
+
     if source in resolvedsource and destination in resolveddest:
-        print(line)
+        print(f'result: {line}')
 
 def main():
     for anchorfiles in os.listdir(f"/home/filipst/git/firewalls/roles/pf/files/pf/{firewallfiles}/firewall/anchors"):
         with open(f"/home/filipst/git/firewalls/roles/pf/files/pf/{firewallfiles}/firewall/anchors/{anchorfiles}",'r') as hostline:
             for line in hostline:
                 if line.startswith("pass"):
+                    #print(line)
                     if args.source is not "False":
                         findhostrule(line,str(args.source).strip(" "),str(args.destination).strip(" "))
                     else: 
