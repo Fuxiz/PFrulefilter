@@ -40,7 +40,7 @@ def findtable(tablename):
     hostlist = []
     with open(f"/home/filipst/git/firewalls/roles/pf/files/pf/{firewallfiles}/firewall/tables",'r') as hostline:
         try:
-            m = re.search(rf'.+\<{tablename}\>.+', hostline.read())
+            m = re.search(rf'.+\(<{tablename}\>) ({{.+}})', hostline.read(),re.MULTILINE | re.DOTALL)
             temp = str(m.group())
      
         except AttributeError:
