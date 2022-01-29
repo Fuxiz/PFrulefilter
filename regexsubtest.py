@@ -40,7 +40,7 @@ def findtable(tablename):
     hostlist = []
     with open(f"/home/filipst/git/firewalls/roles/pf/files/pf/{firewallfiles}/firewall/tables",'r') as hostline:
         try:
-            m = re.search(rf'.+\(<{tablename}\>) ({{.+}})', hostline.read(),re.MULTILINE | re.DOTALL)
+            m = re.search(rf'.+\<{tablename}\>\s+persist\s+{{([^}}]*)\}}', hostline.read(),re.MULTILINE | re.DOTALL)
             temp = str(m.group())
      
         except AttributeError:
@@ -74,6 +74,7 @@ def findhostrule(line,source,destination):
     tmptablesrc = [""]
     tmptabledest = [""]
     splitrawrule = line.split()
+   # print(line)
     for item in splitrawrule:
         if item == "from":
             sourceindex = splitrawrule.index(item)
